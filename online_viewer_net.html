@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selamat Ulang Tahun Sayang! ❤️</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: #e0f2fe; 
+            color: #334155;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        /* --- CONTROL PANEL (MENU EDIT) --- */
+        .control-panel {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.98);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+            gap: 12px;
+            width: 90%;
+            max-width: 380px;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 2px solid #38bdf8;
+        }
+
+        .control-panel h3 { color: #0284c7; text-align: center; margin-bottom: 5px; }
+        .control-panel label { font-size: 13px; font-weight: bold; color: #555; }
+        .control-panel input[type="text"], .control-panel textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #bae6fd;
+            border-radius: 8px;
+            font-size: 13px;
+        }
+
+        .foto-inputs {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .foto-inputs div { display: flex; flex-direction: column; gap: 3px; }
+
+        .btn {
+            background: #0284c7;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+            text-align: center;
+        }
+
+        .btn:hover { background: #38bdf8; }
+
+        .btn-edit {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1001;
+            background: rgba(255, 255, 255, 0.85);
+            color: #0284c7;
+            border: 2px solid #0284c7;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* --- HALAMAN SETUP --- */
+        .page {
+            display: none;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .active { display: flex; }
+
+        /* --- HALAMAN 1: COUNTDOWN & KADO --- */
+        #page1 { background: #bae6fd; } 
+        .countdown-num {
+            font-size: 100px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            animation: bounceScale 1s infinite;
+        }
+
+        .gift-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .gift-box {
+            font-size: 120px;
+            transition: transform 0.2s;
+            animation: wobble 2s infinite;
+        }
+
+        .gift-box.hit {
+            animation: shake 0.2s ease-in-out infinite !important;
+        }
+
+        .gift-instruction {
+            background: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            color: #0284c7;
+            font-weight: bold;
+            margin-top: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        /* --- HALAMAN 2: BALON FOTO & TEKS MINI TRANSPARAN --- */
+        #page2 { background: #e0f2fe; }
+        
+        .balloon-container {
+            position: absolute;
+            bottom: -250px;
+            animation: flyUp 10s linear infinite;
+            z-index: 1;
+        }
+
+        .photo-balloon {
+            width: 120px;
+            height: 150px;
+            background: white;
+            padding: 8px 8px 24px 8px;
+            border-radius: 4px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.12);
+            position: relative;
+            border: 3px solid #bae6fd;
+        }
+
+        .photo-balloon img {
+            width: 100%;
+            height: 110px;
+            object-fit: cover;
+            border-radius: 2px;
+        }
+
+        .photo-balloon::after {
+            content: "";
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            width: 2px;
+            height: 25px;
+            background: #38bdf8;
+        }
+
+        .text-box {
+            background: rgba(255, 255, 255, 0.45); 
+            backdrop-filter: blur(10px); 
+            -webkit-backdrop-filter: blur(10px);
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            max-width: 400px; 
+            width: 85%;
+            z-index: 10; 
+            position: relative;
+            text-align: center;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .text-box p {
+            font-size: 15px;
+            color: #1e293b;
+            font-weight: 600;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        /* --- HALAMAN 3: UTAMA --- */
+        #page3 { background: #0284c7; color: white; }
+        #page3 h1 { font-size: 38px; animation: pulse 1.5s infinite; text-shadow: 0 3px 10px rgba(0,0,0,0.2); }
+        #page3 p { margin: 20px 0 30px 0; font-size: 18px; max-width: 550px; line-height: 1.6; }
+
+        .bg-balloon {
+            position: absolute;
+            font-size: 40px;
+            bottom: -60px;
+            animation: flyUpBg 6s linear infinite;
+            z-index: 1;
+            opacity: 0.8;
+        }
+
+        /* --- ANIMASI --- */
+        @keyframes bounceScale {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.25); }
+        }
+
+        @keyframes wobble {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-8deg); }
+            75% { transform: rotate(8deg); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0) rotate(0deg); }
+            20% { transform: translateX(-5px) rotate(-3deg); }
+            40% { transform: translateX(5px) rotate(3deg); }
+            60% { transform: translateX(-5px) rotate(-2deg); }
+            80% { transform: translateX(5px) rotate(2deg); }
+        }
+
+        @keyframes flyUp {
+            0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-130vh) rotate(20deg); opacity: 0; }
+        }
+
+        @keyframes flyUpBg {
+            0% { transform: translateY(0); opacity: 0; }
+            10% { opacity: 0.8; }
+            100% { transform: translateY(-120vh); opacity: 0; }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.06); }
+        }
+
+        #bgm { display: none; }
+    </style>
+</head>
+<body>
+
+    <button class="btn-edit" onclick="toggleControlPanel()">⚙️ Edit Konten</button>
+
+    <div class="control-panel" id="controlPanel">
+        <h3>Pengaturan Web 💙</h3>
+        <p id="statusSimpan" style="font-size: 11px; text-align:center; color:#2a9d8f; margin-bottom: 10px; font-weight: bold;">✨ Semua perubahan otomatis disimpan!</p>
+        <hr style="border: 0; border-top: 1px solid #eee;">
+        
+        <label>Pesan Halaman 2:</label>
+        <textarea id="inputTeksP2" rows="3" oninput="simpanTeksOtomatis()"></textarea>
+        
+        <label>Judul Halaman 3:</label>
+        <input type="text" id="inputJudulP3" oninput="simpanTeksOtomatis()">
+        
+        <label>Pesan Halaman 3:</label>
+        <textarea id="inputTeksP3" rows="3" oninput="simpanTeksOtomatis()"></textarea>
+
+        <label>Ganti 5 Foto Balon (Halaman 2):</label>
+        <div class="foto-inputs">
+            <div><label>Foto 1</label><input type="file" id="inputFoto1" accept="image/*" onchange="prosesDanSimpanFoto(1)"></div>
+            <div><label>Foto 2</label><input type="file" id="inputFoto2" accept="image/*" onchange="prosesDanSimpanFoto(2)"></div>
+            <div><label>Foto 3</label><input type="file" id="inputFoto3" accept="image/*" onchange="prosesDanSimpanFoto(3)"></div>
+            <div><label>Foto 4</label><input type="file" id="inputFoto4" accept="image/*" onchange="prosesDanSimpanFoto(4)"></div>
+            <div><label>Foto 5</label><input type="file" id="inputFoto5" accept="image/*" onchange="prosesDanSimpanFoto(5)"></div>
+        </div>
+
+        <label>Masukkan Musik Latar (.mp3) - Max 5MB:</label>
+        <input type="file" id="inputAudio" accept="audio/*" onchange="simpanAudioOtomatis()">
+
+        <button class="btn" style="margin-top: 10px; background: #2a9d8f;" onclick="toggleControlPanel()">Tutup Menu ❌</button>
+    </div>
+
+    <audio id="bgm" loop></audio>
+
+    <div class="page active" id="page1">
+        <div class="countdown-num" id="countdown">1</div>
+        <div class="gift-container" id="giftContainer" onclick="ketukKado()">
+            <div class="gift-box" id="giftBox">🎁</div>
+            <div class="gift-instruction" id="giftTips">Ketuk kadonya 3 kali untuk membuka! ✨</div>
+        </div>
+        <div id="bgBalloonsContainer"></div>
+    </div>
+
+    <div class="page" id="page2">
+        <div class="balloon-container" style="left: 5%; animation-delay: 0s; animation-duration: 9s;">
+            <div class="photo-balloon" style="transform: rotate(-6deg);"><img id="foto1" src="" alt="Foto 1"></div>
+        </div>
+        <div class="balloon-container" style="left: 23%; animation-delay: 3s; animation-duration: 11s;">
+            <div class="photo-balloon" style="transform: rotate(5deg);"><img id="foto2" src="" alt="Foto 2"></div>
+        </div>
+        <div class="balloon-container" style="left: 45%; animation-delay: 1s; animation-duration: 8s;">
+            <div class="photo-balloon" style="transform: rotate(-3deg);"><img id="foto3" src="" alt="Foto 3"></div>
+        </div>
+        <div class="balloon-container" style="left: 68%; animation-delay: 4s; animation-duration: 12s;">
+            <div class="photo-balloon" style="transform: rotate(7deg);"><img id="foto4" src="" alt="Foto 4"></div>
+        </div>
+        <div class="balloon-container" style="left: 85%; animation-delay: 2s; animation-duration: 10s;">
+            <div class="photo-balloon" style="transform: rotate(-5deg);"><img id="foto5" src="" alt="Foto 5"></div>
+        </div>
+
+        <div class="text-box">
+            <p id="teksP2">Memuat teks...</p>
+            <button class="btn" onclick="keHalaman3()">Baca Pesan Selanjutnya 💙</button>
+        </div>
+    </div>
+
+    <div class="page" id="page3">
+        <h1 id="judulP3">Memuat Judul...</h1>
+        <p id="teksP3">Memuat pesan...</p>
+        <button class="btn" style="background: white; color: #0284c7;" onclick="ulangKeAwal()">🔄 Ulangi dari Awal</button>
+    </div>
+
+    <script>
+        const countdownEl = document.getElementById('countdown');
+        const giftContainer = document.getElementById('giftContainer');
+        const giftBox = document.getElementById('giftBox');
+        const giftTips = document.getElementById('giftTips');
+        const bgm = document.getElementById('bgm');
+        const statusSimpan = document.getElementById('statusSimpan');
+        
+        let jumlahKetukan = 0;
+        const defaultFoto = "https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=400";
+        
+        const defaultData = {
+            teksP2: "Halo sayang! Di hari yang spesial ini, aku sengaja buat balon-balon foto kenangan kita berterbangan khusus buat kamu. Selamat ulang tahun ya, sehat selalu dan bahagia terus bersamaku! Klik tombol di bawah yaa...",
+            judulP3: "Happy Birthday Sayangku! 🎉💙",
+            teksP3: "Terima kasih sudah lahir ke dunia ini dan menjadi bagian paling indah di hidupku. Semoga semua impianmu tercapai, dan hubungan kita makin erat ya. I love you so much! 🥰",
+            fotos: [defaultFoto, defaultFoto, defaultFoto, defaultFoto, defaultFoto]
+        };
+
+        function terapkanData() {
+            document.getElementById('teksP2').innerText = localStorage.getItem('h2_teks') || defaultData.teksP2;
+            document.getElementById('judulP3').innerText = localStorage.getItem('h3_judul') || defaultData.judulP3;
+            document.getElementById('teksP3').innerText = localStorage.getItem('h3_teks') || defaultData.teksP3;
+            
+            for(let i=1; i<=5; i++) {
+                document.getElementById(`foto${i}`).src = localStorage.getItem(`h2_f${i}`) || defaultData.fotos[i-1];
+            }
+            
+            // MEMASTIKAN LAGU BAWAAN BENAR-BENAR KOSONG JIKA TIDAK ADA INPUTAN USER
+            const savedAudio = localStorage.getItem('global_audio');
+            if (savedAudio && savedAudio !== "") {
+                bgm.src = savedAudio;
+            } else {
+                bgm.src = "";
+                bgm.removeAttribute('src'); 
+            }
+
+            document.getElementById('inputTeksP2').value = localStorage.getItem('h2_teks') || defaultData.teksP2;
+            document.getElementById('inputJudulP3').value = localStorage.getItem('h3_judul') || defaultData.judulP3;
+            document.getElementById('inputTeksP3').value = localStorage.getItem('h3_teks') || defaultData.teksP3;
+        }
+
+        function toggleControlPanel() {
+            const panel = document.getElementById('controlPanel');
+            panel.style.display = panel.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        function simpanTeksOtomatis() {
+            const t2 = document.getElementById('inputTeksP2').value;
+            const j3 = document.getElementById('inputJudulP3').value;
+            const t3 = document.getElementById('inputTeksP3').value;
+
+            localStorage.setItem('h2_teks', t2);
+            localStorage.setItem('h3_judul', j3);
+            localStorage.setItem('h3_teks', t3);
+
+            document.getElementById('teksP2').innerText = t2;
+            document.getElementById('judulP3').innerText = j3;
+            document.getElementById('teksP3').innerText = t3;
+        }
+
+        function prosesDanSimpanFoto(index) {
+            const fileInput = document.getElementById(`inputFoto${index}`);
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            statusSimpan.innerText = "⏳ Sedang mengompresi foto...";
+            statusSimpan.style.color = "#e63946";
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    
+                    const maxW = 300;
+                    const scale = maxW / img.width;
+                    canvas.width = maxW;
+                    canvas.height = img.height * scale;
+                    
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                    
+                    try {
+                        localStorage.setItem(`h2_f${index}`, dataUrl);
+                        document.getElementById(`foto${index}`).src = dataUrl;
+                        statusSimpan.innerText = "✨ Foto berhasil disimpan!";
+                        statusSimpan.style.color = "#2a9d8f";
+                    } catch(err) {
+                        alert("Gagal menyimpan. Memori penuh, silakan pakai foto lain.");
+                        statusSimpan.innerText = "❌ Gagal Menyimpan.";
+                    }
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function simpanAudioOtomatis() {
+            const audioInput = document.getElementById('inputAudio');
+            const file = audioInput.files[0];
+            if(!file) return;
+
+            // BATAS DISESUAIKAN TEPAT 5 MB (5.242.880 Bytes)
+            if(file.size > 5242880) {
+                alert("File lagu terlalu besar! Pastikan ukuran file .mp3 di bawah 5 MB agar sistem tidak macet.");
+                return;
+            }
+
+            statusSimpan.innerText = "⏳ Menyimpan lagu baru...";
+            const reader = new FileReader();
+            reader.onloadend = function() {
+                try {
+                    localStorage.setItem('global_audio', reader.result);
+                    bgm.src = reader.result;
+                    bgm.load();
+                    statusSimpan.innerText = "✨ Lagu baru berhasil dipasang!";
+                    statusSimpan.style.color = "#2a9d8f";
+                } catch(e) {
+                    alert("Penyimpanan ditolak oleh browser. Coba gunakan file audio yang dikompresi lagi atau ukurannya lebih kecil sedikit.");
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function jalankanWeb() {
+            terapkanData();
+            mulaiCountdown();
+        }
+
+        function mulaiCountdown() {
+            jumlahKetukan = 0;
+            giftTips.innerText = "Ketuk kadonya 3 kali untuk membuka! ✨";
+            pindahHalaman('page1');
+            countdownEl.style.display = 'block';
+            giftContainer.style.display = 'none';
+            
+            let angka = 1;
+            countdownEl.innerText = angka;
+
+            const timer = setInterval(() => {
+                angka++;
+                if (angka <= 3) {
+                    countdownEl.innerText = angka;
+                } else {
+                    clearInterval(timer);
+                    countdownEl.style.display = 'none';
+                    giftContainer.style.display = 'flex';
+                }
+            }, 1000);
+        }
+
+        function mainkanSuaraDuar() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(120, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+                gain.gain.setValueAtTime(1, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.4);
+            } catch(e) {}
+        }
+
+        function ketukKado() {
+            jumlahKetukan++;
+            giftBox.classList.add('hit');
+            setTimeout(() => { giftBox.classList.remove('hit'); }, 200);
+
+            if (jumlahKetukan === 1) {
+                giftTips.innerText = "Ayo ketuk lagi! (2 kali lagi) ✌️";
+            } else if (jumlahKetukan === 2) {
+                giftTips.innerText = "Satu kali lagi! 👆";
+            } else if (jumlahKetukan >= 3) {
+                giftTips.innerText = "Terbuka! 🎉";
+                bukaKado();
+            }
+        }
+
+        function bukaKado() {
+            mainkanSuaraDuar();
+            
+            // Musik diputar HANYA jika pengguna telah mengunggah lagunya sendiri
+            if (bgm.src && bgm.src !== window.location.href) {
+                bgm.play().catch(() => {});
+            }
+
+            const container = document.getElementById('bgBalloonsContainer');
+            const listBalon = ['🎈', '🍬', '💙', '✨', '🌸', '🎉'];
+            
+            for(let i=0; i<45; i++) {
+                const balon = document.createElement('div');
+                balon.className = 'bg-balloon';
+                balon.innerText = listBalon[Math.floor(Math.random() * listBalon.length)];
+                balon.style.left = Math.random() * 100 + '%';
+                balon.style.animationDelay = Math.random() * 2 + 's';
+                balon.style.fontSize = Math.random() * 20 + 30 + 'px';
+                balon.style.animationDuration = Math.random() * 3 + 4 + 's';
+                container.appendChild(balon);
+            }
+
+            setTimeout(() => { pindahHalaman('page2'); }, 2500);
+        }
+
+        function keHalaman3() { pindahHalaman('page3'); }
+
+        function ulangKeAwal() {
+            document.getElementById('bgBalloonsContainer').innerHTML = '';
+            mulaiCountdown();
+        }
+
+        function pindahHalaman(idHalaman) {
+            document.querySelectorAll('.page').forEach(h => h.classList.remove('active'));
+            document.getElementById(idHalaman).classList.add('active');
+        }
+
+        window.onload = jalankanWeb;
+    </script>
+</body>
+</html>
