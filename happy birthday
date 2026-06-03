@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selamat Ulang Tahun Sayang! ❤️</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: #ffe5ec;
+            color: #4a5568;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Control Panel Utama (Hidden by default, muncul saat klik tombol edit) */
+        .control-panel {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            z-index: 100;
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .control-panel input, .control-panel textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ffb3c6;
+            border-radius: 8px;
+        }
+
+        .btn {
+            background: #ff4d6d;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .btn:hover { background: #ff758f; }
+
+        .btn-edit {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 101;
+            background: rgba(255, 255, 255, 0.7);
+            color: #ff4d6d;
+            border: 2px solid #ff4d6d;
+        }
+
+        /* Halaman Setup */
+        .page {
+            display: none;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .active { display: flex; }
+
+        /* --- HALAMAN 1: HITUNG MUNDUR --- */
+        #page1 { background: #ffb3c6; }
+        .countdown-num {
+            font-size: 120px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            animation: bounceScale 1s infinite;
+        }
+
+        /* --- HALAMAN 2: BALON & TEKS --- */
+        #page2 { background: #ffe5ec; }
+        
+        /* Bingkai Foto Balon */
+        .balloon-container {
+            position: absolute;
+            bottom: -200px;
+            animation: flyUp 8s linear infinite;
+            cursor: pointer;
+        }
+
+        .photo-balloon {
+            width: 150px;
+            height: 180px;
+            background: white;
+            padding: 10px 10px 30px 10px;
+            border-radius: 4px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+            transform: rotate(-5deg);
+            position: relative;
+        }
+
+        .photo-balloon img {
+            width: 130px;
+            height: 130px;
+            object-fit: cover;
+            border-radius: 2px;
+        }
+
+        /* Tali Balon */
+        .photo-balloon::after {
+            content: "";
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            width: 2px;
+            height: 30px;
+            background: #ff758f;
+        }
+
+        .text-box {
+            background: rgba(255, 255, 255, 0.85);
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(255, 77, 109, 0.2);
+            max-width: 500px;
+            z-index: 10;
+            backdrop-filter: blur(5px);
+            border: 2px dashed #ff758f;
+        }
+
+        .text-box h2 { color: #ff4d6d; margin-bottom: 10px; }
+
+        /* --- HALAMAN 3: TERAKHIR --- */
+        #page3 { background: #ff4d6d; color: white; }
+        #page3 h1 { font-size: 40px; animation: pulse 1.5s infinite; }
+        #page3 p { margin-top: 15px; font-size: 18px; max-width: 600px; }
+
+        /* --- ANIMASI --- */
+        @keyframes bounceScale {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+        }
+
+        @keyframes flyUp {
+            0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-120vh) rotate(15deg); opacity: 0; }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* Audio Player Tersembunyi */
+        #bgm { display: none; }
+    </style>
+</head>
+<body>
+
+    <!-- Tombol Kontrol Edit -->
+    <button class="btn btn-edit" onclick="toggleControlPanel()">⚙️ Edit Konten</button>
+
+    <!-- Panel Pengaturan (Bisa diubah lalu disimpan) -->
+    <div class="control-panel" id="controlPanel">
+        <h3>Pengaturan Web ❤️</h3>
+        <hr>
+        <label>Teks Halaman 2:</label>
+        <textarea id="inputTeksP2" rows="3"></textarea>
+        
+        <label>Teks Halaman 3 (Judul & Pesan):</label>
+        <input type="text" id="inputJudulP3">
+        <textarea id="inputTeksP3" rows="3"></textarea>
+
+        <label>Ganti Foto Pacar (Bentuk Balon):</label>
+        <input type="file" id="inputFoto" accept="image/*">
+
+        <label>Ganti Musik Latar (.mp3):</label>
+        <input type="file" id="inputAudio" accept="audio/*">
+
+        <button class="btn" onclick="simpanPengaturan()">Simpan & Refresh ✨</button>
+    </div>
+
+    <!-- Musik Latar -->
+    <audio id="bgm" loop></audio>
+
+    <!-- HALAMAN 1: COUNTDOWN -->
+    <div class="page active" id="page1">
+        <p style="color: white; font-size: 20px; margin-bottom: 10px;">Bersiaplah...</p>
+        <div class="countdown-num" id="countdown">1</div>
+    </div>
+
+    <!-- HALAMAN 2: TEKS & BALON FOTO -->
+    <div class="page" id="page2">
+        <!-- Balon Foto Terbang -->
+        <div class="balloon-container" style="left: 15%;">
+            <div class="photo-balloon">
+                <img id="fotoPacar1" src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=500" alt="Foto Pacar">
+            </div>
+        </div>
+        <div class="balloon-container" style="left: 70%; animation-delay: 3s;">
+            <div class="photo-balloon" style="transform: rotate(8deg);">
+                <img id="fotoPacar2" src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=500" alt="Foto Pacar">
+            </div>
+        </div>
+
+        <!-- Kotak Teks -->
+        <div class="text-box">
+            <p id="teksP2">Halo sayang! Lihat deh ada balon foto kamu beterbangan. Selamat ulang tahun ya! Klik tombol di bawah untuk lanjut...</p>
+            <br>
+            <button class="btn" onclick="keHalaman3()">Klik ke Halaman Selanjutnya 👉</button>
+        </div>
+    </div>
+
+    <!-- HALAMAN 3: HALAMAN UTAMA / AKHIR -->
+    <div class="page" id="page3">
+        <h1 id="judulP3">Happy Birthday Sayang! 🎉</h1>
+        <p id="teksP3">Semoga panjang umur, sehat selalu, dan dilancarkan segala urusannya. Terima kasih sudah menjadi bagian terindah dalam hidupku. I Love You! ❤️</p>
+        <p style="font-size: 12px; margin-top: 50px; opacity: 0.7;">Web akan mengulang ke halaman pertama secara otomatis dalam beberapa saat...</p>
+    </div>
+
+    <script>
+        // Mengambil elemen HTML
+        const countdownEl = document.getElementById('countdown');
+        const bgm = document.getElementById('bgm');
+        
+        // Data Default jika LocalStorage masih kosong
+        const defaultData = {
+            teksP2: "Halo sayang! Lihat deh ada balon foto kamu beterbangan. Selamat ulang tahun ya! Klik tombol di bawah untuk lanjut...",
+            judulP3: "Happy Birthday Sayang! 🎉",
+            teksP3: "Semoga panjang umur, sehat selalu, dan dilancarkan segala urusannya. Terima kasih sudah menjadi bagian terindah dalam hidupku. I Love You! ❤️",
+            foto: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=500",
+            audio: ""
+        };
+
+        // Load data dari Local Storage saat web dibuka
+        function loadData() {
+            const teksP2 = localStorage.getItem('teksP2') || defaultData.teksP2;
+            const judulP3 = localStorage.getItem('judulP3') || defaultData.judulP3;
+            const teksP3 = localStorage.getItem('teksP3') || defaultData.teksP3;
+            const foto = localStorage.getItem('fotoPacar') || defaultData.foto;
+            const audioData = localStorage.getItem('audioBgm');
+
+            // Terapkan ke tampilan halaman Web
+            document.getElementById('teksP2').innerText = teksP2;
+            document.getElementById('judulP3').innerText = judulP3;
+            document.getElementById('teksP3').innerText = teksP3;
+            document.getElementById('fotoPacar1').src = foto;
+            document.getElementById('fotoPacar2').src = foto;
+
+            // Terapkan ke form input di panel edit agar sinkron
+            document.getElementById('inputTeksP2').value = teksP2;
+            document.getElementById('inputJudulP3').value = judulP3;
+            document.getElementById('inputTeksP3').value = teksP3;
+
+            // Set Audio Musik
+            if (audioData) {
+                bgm.src = audioData;
+            } else {
+                // Musik default bawaan (bisa diganti link mp3 lain)
+                bgm.src = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"; 
+            }
+        }
+
+        // Tampilkan atau Sembunyikan Menu Pengaturan
+        function toggleControlPanel() {
+            const panel = document.getElementById('controlPanel');
+            panel.style.display = panel.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        // Simpan perubahan ke LocalStorage
+        function simpanPengaturan() {
+            localStorage.setItem('teksP2', document.getElementById('inputTeksP2').value);
+            localStorage.setItem('judulP3', document.getElementById('inputJudulP3').value);
+            localStorage.setItem('teksP3', document.getElementById('inputTeksP3').value);
+
+            // Proses simpan foto ke LocalStorage (Base64 string)
+            const fotoFile = document.getElementById('inputFoto').files[0];
+            if (fotoFile) {
+                const reader = new FileReader();
+                reader.onloadend = function() {
+                    localStorage.setItem('fotoPacar', reader.result);
+                    simpanAudioDanRefresh(); 
+                }
+                reader.readAsDataURL(fotoFile);
+            } else {
+                simpanAudioDanRefresh();
+            }
+        }
+
+        function simpanAudioDanRefresh() {
+            const audioFile = document.getElementById('inputAudio').files[0];
+            if (audioFile) {
+                const reader = new FileReader();
+                reader.onloadend = function() {
+                    localStorage.setItem('audioBgm', reader.result);
+                    alert("Semua data berhasil disimpan!");
+                    location.reload();
+                }
+                reader.readAsDataURL(audioFile);
+            } else {
+                alert("Semua data berhasil disimpan!");
+                location.reload();
+            }
+        }
+
+        // --- SISTEM NAVIGASI HALAMAN & LOGIKA ---
+        let loopTimeout;
+
+        function mulaiWeb() {
+            loadData();
+            jalankanHalaman1();
+        }
+
+        // 1. Halaman 1: Hitung mundur 1 sampai 3
+        function jalankanHalaman1() {
+            clearTimeout(loopTimeout);
+            pindahHalaman('page1');
+            let count = 1;
+            countdownEl.innerText = count;
+
+            const interval = setInterval(() => {
+                count++;
+                if (count <= 3) {
+                    countdownEl.innerText = count;
+                } else {
+                    clearInterval(interval);
+                    // Putar musik saat masuk ke halaman 2 setelah interaksi user
+                    bgm.play().catch(e => console.log("Musik butuh interaksi user untuk berputar."));
+                    jalankanHalaman2();
+                }
+            }, 1000);
+        }
+
+        // 2. Halaman 2: Otomatis lanjut dari hal 1, harus klik tombol untuk lanjut ke hal 3
+        function jalankanHalaman2() {
+            pindahHalaman('page2');
+        }
+
+        // Fungsi dipanggil saat tombol di halaman 2 di-klik
+        function keHalaman3() {
+            pindahHalaman('page3');
+
+            // 3. Halaman 3: Mengulang kembali ke halaman pertama setelah 15 detik
+            loopTimeout = setTimeout(() => {
+                jalankanHalaman1();
+            }, 15000); // 15000ms = 15 detik
+        }
+
+        // Fungsi pembantu pindah halaman CSS class
+        function pindahHalaman(pageId) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById(pageId).classList.add('active');
+        }
+
+        // Jalankan sistem saat window selesai dimuat
+        window.onload = mulaiWeb;
+    </script>
+</body>
+</html>
